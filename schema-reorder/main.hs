@@ -77,12 +77,13 @@ groupLines ((Table name line cols):xs) = Table name line (cols ++ moreCols) : gr
     (unknowns, after) = span isUnknown xs
     moreCols = map parseUnknown unknowns
     parseUnknown (Unknown x) = parseColumn x
+    parseUnknown _ = error "unexpected"
 groupLines (x:xs) = x : groupLines xs
 
 sortColumns :: [Column] -> [Column] -> [Column]
 sortColumns [] _  = []
 sortColumns xs [] = xs
-sortColumns all1@(x1:xs1) all2@(x2:xs2)
+sortColumns (x1:xs1) all2@(x2:xs2)
   | x1 == x2      = x1   :  sortColumns xs1 xs2
   | x2 `elem` xs1 = isX2 ++ sortColumns (x1:isNotX2) xs2
   | otherwise     = x1   :  sortColumns xs1 all2
@@ -95,7 +96,9 @@ maybeSortColumns _ x = x
 
 mapTables :: [Line] -> ReferenceMap
 mapTables = Map.fromList . map assoc . filter isTable
-  where assoc (Table name _ cols) = (name, cols)
+  where
+    assoc (Table name _ cols) = (name, cols)
+    assoc _ = error "unexpected"
 
 outputLine :: Line -> String
 outputLine (Unknown line) = line
