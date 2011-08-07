@@ -59,7 +59,7 @@ repackInTemp base file = withTempDirectory base "repack." repackIn
 repack :: ModFile -> IO ()
 repack file = do
   runCommand $ unpackCommand file
-  getDirectoryContents "." >>= return . onlyPath >>= changeWorkingDirectory
+  fmap onlyPath (getDirectoryContents ".") >>= changeWorkingDirectory
   print $ packCommand $ outputFile file
   runCommand $ packCommand $ outputFile file
 
