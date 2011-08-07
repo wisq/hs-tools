@@ -33,8 +33,11 @@ instance Ord (Column) where
 main :: IO ()
 main = do
   args <- getArgs
-  input1 <- readFile $ args !! 0
-  input2 <- readFile $ args !! 1
+  if length args /= 2
+    then error "Usage: schema-reorder <schema.rb> <ref/schema.rb>"
+    else return ()
+
+  input1 : input2 : _ <- mapM readFile args
   let refmap = mapTables $ parseFile input2
   let schema = map (maybeSortColumns refmap) $ parseFile input1
   putStr $ outputLines schema
@@ -72,7 +75,7 @@ parseColumn line = Column (findName line) line
 
 groupLines :: [Line] -> [Line]
 groupLines [] = []
-groupLines ((Table name line cols):xs) = Table name line (cols ++ moreCols) : groupLines after
+groupLines (Table name line cols:xs) = Table name line (cols ++ moreCols) : groupLines after
   where
     (unknowns, after) = span isUnknown xs
     moreCols = map parseUnknown unknowns
