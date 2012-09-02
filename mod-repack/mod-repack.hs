@@ -87,4 +87,9 @@ packCommand (SevenZip file) = ("7zr", ["a", file, "."])
 packCommand _ = error "not expected"
 
 outputFile :: ModFile -> ModFile
-outputFile = SevenZip . (++ "-repack.7z") . dropExtensions . modFilePath
+outputFile = SevenZip . (++ "-repack.7z") . dropSomeExt . modFilePath
+  where
+    dropSomeExt f | not $ hasExtension f = f
+    dropSomeExt f | (takeExtension f) `elem` zipExts = dropExtension f
+    dropSomeExt f | otherwise = dropSomeExt $ dropExtension f
+    zipExts = [".zip", ".rar", ".7z"]
